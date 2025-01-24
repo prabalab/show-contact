@@ -14,6 +14,9 @@ const pool = new Pool({
   },
 });
 
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
 // Set EJS as the template engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -29,6 +32,22 @@ app.get("/", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
+  }
+});
+
+// Route to delete a message by ID
+app.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query("DELETE FROM contacts WHERE id = $1", [id]);
+    if (result.rowCount > 0) {
+      res.status(200).json({ message: "Message deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Message not found" });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
